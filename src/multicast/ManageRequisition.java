@@ -5,29 +5,48 @@ package multicast;
  */
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.Socket;
+import java.util.ArrayList;
 
-public class ManageRequisition implements Runnable{
+public class ManageRequisition extends Thread{
 
-    private int m;
-    private InputStream input;
-    private Server server;
+    private Socket server;
+    private ArrayList<Message> messages;
 
-    public ManageRequisition(Server s, InputStream input){
-        this.input = input;
-        this.server = s;
+    public ManageRequisition(Socket server){
+        this.server=server;
     }
 
-    // mandar mensagem para saida
     public void readMessage(){
         try {
-            while(true){
-                m = input.read();
-                server.addMessage(m);
+            System.out.println("Iniciada a thread do manage requisition.");
+            byte[] object = new byte[1024];
+            while(true) {
+                int i = 0;
+                server.getInputStream().read(object);
+                Message message = (Message)Utils.getObject(object);
+                System.out.println("Mensagem recebida.");
+                if (messages != null) {
+                    for (Message m : messages) {
+                        if (message.getClockFromProcess() < m.getClockFromProcess()) {
+                            messages.add(i, message);
+                        } else {
+                            i++;
+                        }
+                    }
+                }else{
+                    messages.add(message);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
+    }
+
+    public ArrayList<Message> getMessages() {
+        return messages;
     }
 
     @Override

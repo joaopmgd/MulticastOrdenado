@@ -11,40 +11,26 @@ import java.util.ArrayList;
 
 public class Server extends Thread {
 
-    private ServerSocket socket;
+    private ServerSocket serverSocket;
     private ArrayList<Socket> socketList;
-    private ArrayList<Integer> messages;
-    private int pid;
 
-    public Server(int porta, int pid){
+    public Server(int port){
         try {
-            this.pid = pid;
-            socketList = new ArrayList<Socket>();
-            socket = new ServerSocket(porta);
-            messages = new ArrayList<Integer>();
+            this.serverSocket = new ServerSocket(port);
+            this.socketList = new ArrayList<Socket>();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public ArrayList<Integer> getMessage(){
-        return messages;
-    }
-
-    //Adicionar na ordem ***
-    public void addMessage(int message){
-        messages.add(message);
-        System.out.println(message + " - " + pid);
-    }
-
-    public void receiveMessage(){
+    public void receiveMessage() {
         try {
-            while(true){
-                Socket s = socket.accept(); // enquanto nao vir uma requisiçao nao passa dessa linha - trava
-                socketList.add(s);
-                ManageRequisition mr = new ManageRequisition(this, s.getInputStream());
-                Thread t = new Thread(mr);
-                t.start();
+            System.out.println("Iniciada thread do server.");
+            while (true) {
+                Socket client = serverSocket.accept();
+                socketList.add(client);
+                ManageRequisition stream = new ManageRequisition(client);
+                stream.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,10 +40,6 @@ public class Server extends Thread {
     @Override
     public void run() {
         receiveMessage();
-    }
-
-    public ArrayList<Socket> getStreams(){
-        return socketList;
     }
 }
 

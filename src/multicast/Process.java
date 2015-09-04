@@ -4,45 +4,42 @@ package multicast;
  * Created by joao on 03/09/15.
  */
 
-public class Process {
+public class Process extends Thread{
 
     private String ip;
-    private int porta;
+    private int port;
+    private int pid;
+    private int clock;
+
     private Client client;
     private Server server;
-    private int pid;
 
-    public Process(String ip ,int porta, int pid){
+
+    public Process(String ip ,int port, int pid){
         this.ip = ip;
-        this.porta = porta;
-        this.server = new Server(porta,pid);
+        this.port = port;
         this.pid = pid;
-    }
-
-    public void showMessages(){
-        System.out.println(pid);
-        for (int m: server.getMessage()){
-            System.out.println(m);
-        }
-    }
-
-    public void sendMessage(int m){
-        client.sendMessage(m);
-    }
-
-    public void connect(String ip, int porta){
-        this.client = new Client(ip, porta);
+        this.clock = 0;
+        this.client = new Client();
     }
 
     public void startListening(){
+        this.server = new Server(port);
         server.start();
+        this.client.connect(ip, port);
     }
 
-    public String getIP(){
-        return ip;
+    public void connect(String ip, int port) {
+        this.client.connect(ip, port);
     }
 
-    public int getPorta(){
-        return porta;
+    public void sendMessage(){
+        this.clock++;
+        client.sendMessage(this.clock, this.pid);
+    }
+
+    @Override
+    public void run(){
+        startListening();
     }
 }
