@@ -13,11 +13,13 @@ public class Server extends Thread {
 
     private ServerSocket serverSocket;
     private ArrayList<Socket> socketList;
+    private Process process;
 
-    public Server(int port){
+    public Server(int port, Process process){
         try {
             this.serverSocket = new ServerSocket(port);
             this.socketList = new ArrayList<Socket>();
+            this.process = process;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -25,16 +27,23 @@ public class Server extends Thread {
 
     public void receiveMessage() {
         try {
-            System.out.println("Iniciada thread do server.");
             while (true) {
                 Socket client = serverSocket.accept();
                 socketList.add(client);
-                ManageRequisition stream = new ManageRequisition(client);
+                ManageRequisition stream = new ManageRequisition(client,this);
                 stream.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addMessage(Message message){
+        process.addMessage(message);
+    }
+
+    public void updateClock(int clockFromMessage){
+        process.updateClock(clockFromMessage);
     }
 
     @Override

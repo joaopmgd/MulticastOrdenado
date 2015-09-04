@@ -1,9 +1,11 @@
 package multicast;
 
+import java.io.Serializable;
+
 /**
  * Created by joao on 03/09/15.
  */
-public class Message {
+public class Message implements Serializable,Comparable<Message>{
 
     private int clockFromProcess;
     private int pid;
@@ -15,27 +17,22 @@ public class Message {
         this.message = message;
     }
 
-    public int getPid() {
-        return pid;
-    }
-
-    public void setPid(int pid) {
-        this.pid = pid;
-    }
-
     public int getClockFromProcess() {
         return clockFromProcess;
     }
 
-    public void setClockFromProcess(int clockFromProcess) {
-        this.clockFromProcess = clockFromProcess;
+    @Override
+    public int compareTo(Message message) {
+        if (this.clockFromProcess < message.getClockFromProcess()){
+            return -1;
+        }else if (this.clockFromProcess == message.getClockFromProcess()){
+            return 0;
+        }else{
+            return 1;
+        }
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public void printMessage(){
+        System.out.println("Message\n- Pid: "+this.pid+"\n- Clock: "+this.clockFromProcess+"\n- Message: "+this.message);
     }
 }

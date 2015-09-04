@@ -5,48 +5,33 @@ package multicast;
  */
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class ManageRequisition extends Thread{
 
-    private Socket server;
-    private ArrayList<Message> messages;
+    private Socket socket;
+    private Server server;
 
-    public ManageRequisition(Socket server){
+    public ManageRequisition(Socket socket, Server server){
+        this.socket=socket;
         this.server=server;
     }
 
     public void readMessage(){
         try {
-            System.out.println("Iniciada a thread do manage requisition.");
-            byte[] object = new byte[1024];
             while(true) {
-                int i = 0;
-                server.getInputStream().read(object);
-                Message message = (Message)Utils.getObject(object);
-                System.out.println("Mensagem recebida.");
-                if (messages != null) {
-                    for (Message m : messages) {
-                        if (message.getClockFromProcess() < m.getClockFromProcess()) {
-                            messages.add(i, message);
-                        } else {
-                            i++;
-                        }
-                    }
-                }else{
-                    messages.add(message);
-                }
+                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                Message message = (Message) input.readObject();
+                server.updateClock(message.getClockFromProcess());
+                server.addMessage(message);
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-    }
-
-    public ArrayList<Message> getMessages() {
-        return messages;
     }
 
     @Override

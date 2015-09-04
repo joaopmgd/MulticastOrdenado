@@ -26,6 +26,8 @@ public class Main {
         p3.connect("localhost",3002);
 
         p1.sendMessage();
+        p2.sendMessage();
+        p2.sendMessage();
 
 
     }
